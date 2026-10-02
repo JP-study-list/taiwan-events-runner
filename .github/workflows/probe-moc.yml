@@ -1,0 +1,29 @@
+name: Probe MOC counts (temporary)
+
+# ⚠️ 臨時測量（2026-10-03，單位 F）：文化部藝文活動 API 深夜會只回部分資料（私有 repo CLAUDE.md §8 地雷 8），
+#    量一晚各類筆數隨時間的變化，用來挑每日更新的時段。**量完就刪這支**。
+#    只數筆數，不抓資料、不寫任何東西。
+# 時間：台灣 00:07～08:07 每小時一次（UTC 16～23、0 點），另 14:07 一次當白天對照。避開整點，GitHub 排程整點最擠。
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7 16-23 * * *"
+    - cron: "7 0,6 * * *"
+
+permissions: {}
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 各類筆數
+        run: |
+          line="$(TZ=Asia/Taipei date '+%m-%d %H:%M') 台灣時間"
+          for c in 1 2 3 5 17 6; do
+            n=$(curl -s --max-time 60 -A "taiwan-events/2.0 (+https://github.com/JP-study-list/taiwan-events-runner)" \
+              "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=$c" \
+              | jq 'length' 2>/dev/null)
+            line="$line | cat$c=${n:-ERR}"
+          done
+          echo "PROBE $line"
