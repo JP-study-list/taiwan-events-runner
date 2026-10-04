@@ -2,10 +2,15 @@ name: Update Events
 
 # ⚠️ 本檔的正本在公開 repo `JP-study-list/taiwan-events-runner` 的 `.github/workflows/update.yml`，
 #    這裡（私有 repo 的 `_runner-template/`）是副本，改一邊要同步另一邊。
-# 2026-10-01（單位 B-2）：先只有手動按鈕，**沒有 schedule**。
-#    排程時間是單位 F：⚠️ 要避開深夜（文化部 API 凌晨只回部分資料，CLAUDE.md §8 地雷 8），挑時段前要實測。
+# 排程（2026-10-04，單位 F，使用者定案）：每天台灣 06:53。
+#    ⚠️ 不可以往前挪進深夜：文化部 API 深夜只回部分資料（私有 repo CLAUDE.md §8 地雷 8）。
+#    實測 10-04 03:10 只剩 5%（1,184→60 筆），06:49 已恢復；06:49 是量過「完整」的最早時間，所以排在它之後。
+#    GitHub 排程只會延遲、不會提早（實測半夜延遲幾分鐘到四十分鐘、甚至整次跳過），延遲只會落到更安全的時段。
+#    避開整點：整點最擠、最容易被跳過。
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "53 22 * * *"    # 每日 06:53 台灣時間（UTC+8）
 
 # runner 自己什麼權限都不需要：取出與推回私有 repo 走的是 TAIWAN_PAT。
 permissions: {}
